@@ -65,9 +65,10 @@ export class Wallet {
     message: { [key: string]: any },
     options: ExecuteOptions = {}
   ): Promise<ExecuteResult> {
-    await this.validateToken(signedToken);
+    // await this.validateToken(signedToken);
     const authorization = this.prepareAuthorization(signedToken);
-    return this.execute({ ...message, authorization }, options);
+    message.post.authorization = authorization;
+    return this.execute(message, options);
   }
 
   async execute(
@@ -75,6 +76,7 @@ export class Wallet {
     { cost, memo }: ExecuteOptions = {}
   ): Promise<ExecuteResult> {
     const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
+    console.log(message);
 
     return this.client.execute(
       this.address,

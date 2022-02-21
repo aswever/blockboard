@@ -11,7 +11,6 @@ const GasPrices = {
 };
 
 export interface AuthMeta {
-  cost_limit: string,
 }
 
 export interface AuthToken {
