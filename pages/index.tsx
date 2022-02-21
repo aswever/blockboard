@@ -1,7 +1,4 @@
 import type { NextPage } from 'next';
-import { useCallback, useEffect, useState } from "react";
-import { useWallet } from "../hooks/useWallet";
-import { SignedToken } from "../util/auth";
 import styles from '../styles/Home.module.css';
 import useSWR from "swr";
 

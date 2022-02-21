@@ -1,22 +1,17 @@
 import type { NextPage } from 'next';
-import { useCallback, useEffect, useState } from "react";
-import { useWallet } from "../hooks/useWallet";
+import { FormEvent, useCallback, useState } from "react";
 import { useAtom } from "jotai";
 import { signedTokenAtom } from "../store";
 import styles from '../styles/Home.module.css';
-import { useRouter } from 'next/router'
 
 const Post: NextPage = () => {
-  const [signedToken, setSignedToken] = useAtom(signedTokenAtom);
+  const [signedToken] = useAtom(signedTokenAtom);
   const [content, setContent] = useState("");
 
-  const { connect } = useWallet();
-
-  const onSubmit = useCallback(async (e: Event) => {
+  const onSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
-    const wallet = await connect();
-    const { response } = await fetch("/api/post", { method: "post", body: JSON.stringify({ signedToken, content }) });
-    console.log(response);
+    const response = await fetch("/api/post", { method: "post", body: JSON.stringify({ signedToken, content }) });
+    console.log(response.json());
   }, [content]);
 
   return (

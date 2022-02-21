@@ -1,7 +1,7 @@
 import { Keplr } from "@keplr-wallet/types";
-import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { ExecuteResult, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { useCallback, useState } from "react";
-import { StdSignature } from "@cosmjs/launchpad";
+import { GasPrice, StdSignature } from "@cosmjs/launchpad";
 
 const CosmosCoinType = 118;
 const GasPrices = {
@@ -9,6 +9,11 @@ const GasPrices = {
   average: 0.025,
   high: 0.03,
 };
+
+interface ExecuteOptions {
+  cost?: Coin[],
+  memo?: string,
+}
 
 export interface AuthMeta {
 }
@@ -29,6 +34,18 @@ export interface SignedToken {
 
 export class KeplrWallet {
   constructor(private keplr: Keplr, public client: SigningCosmWasmClient, private address: string) { }
+
+  async execute(message: { [key: string]: any },
+    { cost, memo }: ExecuteOptions = {}): Promise<ExecuteResult> {
+    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
+    return this.client.execute(
+      this.address,
+      contractAddress,
+      message,
+      "auto",
+      memo,
+      cost);
+  }
 
   async signAuthToken(meta: AuthMeta) {
     const token = {
@@ -103,7 +120,12 @@ export class KeplrWallet {
 
     const client = await SigningCosmWasmClient.connectWithSigner(
       rpcEndpoint,
-      signer
+      signer,
+      {
+        gasPrice: GasPrice.fromString(
+          `${process.env.NEXT_PUBLIC_GAS_PRICE!}${process.env.NEXT_PUBLIC_COIN_NAME!}`
+        ),
+      }
     );
 
     return { client, address };
