@@ -1,17 +1,18 @@
 import type { NextPage } from 'next';
 import { FormEvent, useCallback, useState } from "react";
-import { useAtom } from "jotai";
-import { signedTokenAtom } from "../store";
+import { useSignedToken } from "../store";
 import styles from '../styles/Home.module.css';
+import { useRouter } from "next/router";
 
 const Post: NextPage = () => {
-  const [signedToken] = useAtom(signedTokenAtom);
+  const router = useRouter();
+  const [signedToken] = useSignedToken();
   const [content, setContent] = useState("");
 
   const onSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
     const response = await fetch("/api/post", { method: "post", body: JSON.stringify({ signedToken, content }) });
-    console.log(response.json());
+    router.push("/");
   }, [content]);
 
   return (

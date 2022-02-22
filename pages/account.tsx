@@ -1,31 +1,37 @@
-import type { NextPage } from 'next';
-import { FormEvent, useCallback, useEffect, useState } from "react";
-import { useWallet } from "../hooks/useWallet";
+import type { GetServerSideProps, NextPage } from 'next';
+import { FormEvent, useState } from "react";
+import { useAccount } from "../hooks/useAccount";
 import styles from '../styles/Home.module.css';
-import { toMicroAmount } from "../util/coins";
-import { coins } from '@cosmjs/launchpad';
 
-const Account: NextPage = () => {
+const Account: NextPage<{ initToken: string }> = ({ initToken }) => {
   const [funds, setFunds] = useState("");
+  const [username, setUsername] = useState("");
+  const { loggedIn, addFunds, login } = useAccount(initToken);
 
-  const { connect } = useWallet();
-
-  const onSubmit = useCallback(async (e: FormEvent) => {
+  const submit = (fn: () => void) => (e: FormEvent) => {
     e.preventDefault();
-	  const amount = toMicroAmount(funds, process.env.NEXT_PUBLIC_COIN_DECIMALS!);
-	  const wallet = await connect();
-    const result = await wallet.execute({ deposit_funds: { amount } }, { cost: coins(amount, process.env.NEXT_PUBLIC_COIN_NAME!) });
-    console.log(result);
-  }, [funds]);
+    fn();
+  };
 
   return (
     <div className={styles.container}>
-      <form onSubmit={onSubmit}>
-      <input name="funds" placeholder="Funds to add" value={funds} onChange={(e) => setFunds(e.target.value)} />
-      <button>Add funds</button>
-      </form>
+      {loggedIn ? (
+        <form onSubmit={submit(() => addFunds(funds))}>
+          <input name="funds" placeholder="funds to add" value={funds} onChange={(e) => setFunds(e.target.value)} />
+          <button>add funds</button>
+        </form>
+      ) : (
+	<form onSubmit={submit(() => login(username))}>
+          <input name="username" placeholder="your name" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <button>login</button>
+        </form>
+      )}
     </div>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async(context) => {
+  return { props: { initToken: context.req.cookies.signedToken ?? null } };
 }
 
 export default Account

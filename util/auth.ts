@@ -1,5 +1,5 @@
 import { Secp256k1, Secp256k1Signature, sha256 } from '@cosmjs/crypto';
-import { decodeAminoPubkey, pubkeyToAddress, serializeSignDoc, StdSignDoc } from '@cosmjs/launchpad';
+import { encodeSecp256k1Pubkey, pubkeyToAddress, serializeSignDoc, StdSignDoc } from '@cosmjs/launchpad';
 
 export interface AuthMeta {
   cost_limit: string,
@@ -23,7 +23,7 @@ export async function verifyTokenSignature(signedToken: SignedToken): Promise<bo
   const serialDoc = serializeSignDoc(makeADR36AminoSignDoc(signedToken.address, JSON.stringify(signedToken.token)));
   const signature = Buffer.from(signedToken.signature, 'base64');
   const pubkey = Buffer.from(signedToken.pubkey, 'base64');
-  return pubkeyToAddress(decodeAminoPubkey(pubkey), process.env.ADDR_PREFIX!) === signedToken.address
+  return pubkeyToAddress(encodeSecp256k1Pubkey(pubkey), process.env.NEXT_PUBLIC_ADDR_PREFIX!) === signedToken.address
     && await verifySignedDoc(serialDoc, signature, pubkey);
 }
 

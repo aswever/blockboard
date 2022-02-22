@@ -1,7 +1,7 @@
 import { Keplr } from "@keplr-wallet/types";
 import { ExecuteResult, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { useCallback, useState } from "react";
-import { GasPrice, StdSignature } from "@cosmjs/launchpad";
+import { Coin, GasPrice, StdSignature } from "@cosmjs/launchpad";
 
 const CosmosCoinType = 118;
 const GasPrices = {
@@ -11,25 +11,26 @@ const GasPrices = {
 };
 
 interface ExecuteOptions {
-  cost?: Coin[],
-  memo?: string,
+  cost?: Coin[];
+  memo?: string;
 }
 
 export interface AuthMeta {
+  username: string;
 }
 
 export interface AuthToken {
-  user: string,
+  user: string;
   agent: string;
   expires: number;
   meta: AuthMeta;
 }
 
 export interface SignedToken {
-  token: AuthToken,
-  address: string,
-  signature: string,
-  pubkey: string
+  token: AuthToken;
+  address: string;
+  signature: string;
+  pubkey: string;
 }
 
 export class KeplrWallet {

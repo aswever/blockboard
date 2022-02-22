@@ -1,25 +1,14 @@
-import { FC, useCallback } from "react";
-import { useAtom } from "jotai";
-import { signedTokenAtom } from "../store";
-import { useWallet } from "../hooks/useWallet";
-import ClientOnly from "./ClientOnly";
+import { FC } from "react";
+import Link from "next/link";
+import { useAccount } from "../hooks/useAccount";
 
 const Account: FC = () => {
-  const [signedToken, setSignedToken] = useAtom(signedTokenAtom);
-  const { connect } = useWallet();
-
-  const signToken = useCallback(async () => {
-    const wallet = await connect();
-    const signedToken = await wallet.signAuthToken({})
-    setSignedToken(signedToken);
-  }, [connect, signedToken]);
+  const { loggedIn, balanceString } = useAccount();
 
   return (
-    <ClientOnly>
-      <div>
-        {signedToken ? <div>logged in</div> : <button onClick={() => signToken()}>login</button>}
-      </div>
-    </ClientOnly>
+    <div>
+      <Link href="/account">{loggedIn ? <div>logged in (balance: {balanceString})</div> : "login"}</Link>
+    </div>
   );
 }
 

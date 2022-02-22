@@ -11,7 +11,7 @@ interface ExecuteOptions {
 }
 
 export class Wallet {
-  constructor(private wallet: Secp256k1HdWallet, private client: SigningCosmWasmClient, private address: string) { }
+  constructor(private client: SigningCosmWasmClient, private address: string) { }
 
   static async create(): Promise<Wallet> {
     const wallet = await Secp256k1HdWallet.fromMnemonic(
@@ -31,7 +31,7 @@ export class Wallet {
 
     const [{ address }] = await wallet.getAccounts();
 
-    return new Wallet(wallet, client, address);
+    return new Wallet(client, address);
   }
 
   async validateToken(signedToken: SignedToken): Promise<AuthToken> {
@@ -65,7 +65,7 @@ export class Wallet {
     message: { [key: string]: any },
     options: ExecuteOptions = {}
   ): Promise<ExecuteResult> {
-    // await this.validateToken(signedToken);
+    await this.validateToken(signedToken);
     const authorization = this.prepareAuthorization(signedToken);
     message.post.authorization = authorization;
     return this.execute(message, options);
