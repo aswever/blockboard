@@ -1,37 +1,18 @@
 import {
   ExecuteResult,
-  SigningCosmWasmClient,
 } from '@cosmjs/cosmwasm-stargate';
-import { Coin, GasPrice, Secp256k1HdWallet, serializeSignDoc } from '@cosmjs/launchpad';
-import { AuthToken, makeADR36AminoSignDoc, SignedToken, verifyTokenSignature } from './auth';
+import { Secp256k1HdWallet, serializeSignDoc } from '@cosmjs/launchpad';
+import { makeADR36AminoSignDoc, verifyTokenSignature } from './auth';
+import { AuthToken, ExecuteOptions, SignedToken } from './types';
+import { ContractAccount } from './contractAccount';
 
-interface ExecuteOptions {
-  cost?: Coin[],
-  memo?: string,
-}
-
-export class Wallet {
-  constructor(private client: SigningCosmWasmClient, private address: string) { }
-
-  static async create(): Promise<Wallet> {
+export class ServerAccount extends ContractAccount {
+  static async create(): Promise<ServerAccount> {
     const wallet = await Secp256k1HdWallet.fromMnemonic(
       process.env.WALLET_MNEMONIC!,
       { prefix: process.env.NEXT_PUBLIC_ADDR_PREFIX! },
     );
-
-    const client = await SigningCosmWasmClient.connectWithSigner(
-      process.env.NEXT_PUBLIC_RPC_ENDPOINT!,
-      wallet,
-      {
-        gasPrice: GasPrice.fromString(
-          `${process.env.NEXT_PUBLIC_GAS_PRICE!}${process.env.NEXT_PUBLIC_COIN_NAME!}`
-        ),
-      }
-    );
-
-    const [{ address }] = await wallet.getAccounts();
-
-    return new Wallet(client, address);
+    return super.fromSigner(wallet, this);
   }
 
   async validateToken(signedToken: SignedToken): Promise<AuthToken> {
@@ -69,22 +50,5 @@ export class Wallet {
     const authorization = this.prepareAuthorization(signedToken);
     message.post.authorization = authorization;
     return this.execute(message, options);
-  }
-
-  async execute(
-    message: { [key: string]: any },
-    { cost, memo }: ExecuteOptions = {}
-  ): Promise<ExecuteResult> {
-    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
-    console.log(message);
-
-    return this.client.execute(
-      this.address,
-      contractAddress,
-      message,
-      "auto",
-      memo,
-      cost,
-    );
   }
 }

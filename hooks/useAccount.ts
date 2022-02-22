@@ -1,65 +1,46 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSignedToken } from "../store";
-import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { KeplrWallet } from "./useWallet";
-import { toMicroAmount, fromMicroCoin } from "../util/coins";
-import { coins } from "@cosmjs/launchpad";
+import { ClientAccount } from "../accounts/clientAccount";
+import { toMicroAmount, amountToCoin, fromMicroAmount } from "../util/coins";
+import { config } from "../util/config";
+import { coin } from "@cosmjs/launchpad";
+import { queryContract } from "../util/queryContract";
 
 export const useAccount = (signedTokenInit?: string) => {
   const [signedToken, setSignedToken] = useSignedToken(signedTokenInit);
-  const [balance, setBalance] = useState("0");
-  const [client, setClient] = useState<CosmWasmClient>();
-  const [wallet, setWallet] = useState<KeplrWallet>();
+  const [balance, setBalance] = useState(coin(0, config("coinDenom")));
+  const [account, setAccount] = useState<ClientAccount>();
 
-  const getClient = useCallback(async () => {
-    if (client) return client;
-    const newClient = await CosmWasmClient.connect(process.env.NEXT_PUBLIC_RPC_ENDPOINT!);
-    setClient(newClient);
-    return newClient;
-  }, [client]);
+  const getAccount = useCallback(async (): Promise<ClientAccount> => {
+    if (account) return account;
+    const clientAccount = await ClientAccount.create();
+    setAccount(clientAccount);
+    return clientAccount;
+  }, [account]);
 
-  const getWallet = useCallback(async (): Promise<KeplrWallet> => {
-    if (wallet) return wallet;
-
-    const keplrWallet = await KeplrWallet.create();
-    setWallet(keplrWallet);
-
-    return keplrWallet;
-  }, [wallet]);
-
-  const getSigningClient = useCallback(async (): Promise<SigningCosmWasmClient> => {
-    return (await getWallet()).client;
-  }, [wallet]);
+  const login = useCallback(async (username: string) => {
+    const account = await getAccount();
+    const signedToken = await account.signAuthToken({ username })
+    setSignedToken(signedToken);
+  }, [getAccount, signedToken]);
 
   const getBalance = useCallback(async () => {
-    if (!signedToken) return setBalance("0");
-    const client = await getClient();
-    const { balance } = await client.queryContractSmart(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!, { get_balance: { addr: signedToken.address } });
-    setBalance(balance);
-  }, [signedToken, getClient]);
+    if (!signedToken) return setBalance(amountToCoin(0));
+    const { balance } = await queryContract({ get_balance: { addr: signedToken.address } });
+    setBalance(amountToCoin(balance));
+  }, [signedToken]);
 
   useEffect(() => {
     getBalance();
   }, [getBalance]);
 
-  const login = useCallback(async (username: string) => {
-    const wallet = await getWallet();
-    const signedToken = await wallet.signAuthToken({ username })
-    setSignedToken(signedToken);
-  }, [getWallet, signedToken]);
-
   const addFunds = useCallback(async (funds: string) => {
-    const amount = toMicroAmount(funds, process.env.NEXT_PUBLIC_COIN_DECIMALS!);
-    const wallet = await getWallet();
-    await wallet.execute({ deposit_funds: { amount } }, { cost: coins(amount, process.env.NEXT_PUBLIC_COIN_NAME!) });
+    const amount = toMicroAmount(funds);
+    const account = await getAccount();
+    await account.execute({ deposit_funds: { amount } }, { cost: [amountToCoin(amount)] });
     await getBalance();
-  }, [getWallet]);
+  }, [getAccount]);
 
-  const balanceString = useMemo(() => {
-    const coin = fromMicroCoin({amount: balance, denom: process.env.NEXT_PUBLIC_COIN_NAME!}, process.env.NEXT_PUBLIC_COIN_DECIMALS!);
-    return `${coin.amount}${coin.denom}`;
-  }, [balance]);
-
-  return { getClient, getSigningClient, getWallet, getBalance, balance, balanceString, login, addFunds, loggedIn: signedToken !== undefined };
+  return { getAccount, balance, login, addFunds, loggedIn: !!signedToken, queryContract };
 
 }

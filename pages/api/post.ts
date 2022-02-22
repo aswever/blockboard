@@ -1,9 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
-import { coins } from '@cosmjs/launchpad';
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { SignedToken } from "../../util/auth";
-import { Wallet } from "../../util/wallet";
+import { SignedToken } from "../../accounts/types";
+import { ServerAccount } from "../../accounts/serverAccount";
+import { amountToCoin } from '../../util/coins';
 
 type RequestBody = {
   signedToken: SignedToken;
@@ -19,7 +19,7 @@ export default async function handler(
   res: NextApiResponse<ResponseBody>
 ) {
   const { signedToken, content } = JSON.parse(req.body) as RequestBody;
-  const wallet = await Wallet.create();
-  const response = await wallet.executeWithAuth(signedToken, { post: { message: { content } } }, { cost: coins("10000", process.env.NEXT_PUBLIC_COIN_NAME!) });
+  const account = await ServerAccount.create();
+  const response = await account.executeWithAuth(signedToken, { post: { message: { content } } }, { cost: [amountToCoin(10000)] });
   res.status(200).json({ response })
 }

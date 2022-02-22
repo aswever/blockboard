@@ -1,23 +1,6 @@
 import { Secp256k1, Secp256k1Signature, sha256 } from '@cosmjs/crypto';
 import { encodeSecp256k1Pubkey, pubkeyToAddress, serializeSignDoc, StdSignDoc } from '@cosmjs/launchpad';
-
-export interface AuthMeta {
-  cost_limit: string,
-}
-
-export interface AuthToken {
-  user: string,
-  agent: string;
-  expires: number;
-  meta: AuthMeta;
-}
-
-export interface SignedToken {
-  token: AuthToken,
-  address: string,
-  signature: string,
-  pubkey: string
-}
+import { SignedToken } from './types';
 
 export async function verifyTokenSignature(signedToken: SignedToken): Promise<boolean> {
   const serialDoc = serializeSignDoc(makeADR36AminoSignDoc(signedToken.address, JSON.stringify(signedToken.token)));

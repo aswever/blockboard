@@ -4,22 +4,24 @@ import styles from '../styles/Home.module.css';
 import Link from 'next/link';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { useAccount } from '../hooks/useAccount';
+import { config } from '../util/config';
+import { queryContract } from "../util/queryContract";
 
 interface Post {
   user_addr: string;
   username: string;
   content: string;
-}  
+}
+
+const queryPosts = async (): Promise<Post[]> => (await queryContract({ latest_posts: {} })).posts;
 
 const Home: NextPage<{ initialPosts: Post[] }> = ({ initialPosts }) => {
   const postsInit = useMemo(() => initialPosts, [initialPosts]);
   const [posts, setPosts] = useState(postsInit);
-  const { getClient } = useAccount();
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const client = await getClient();
-      const { posts }: { posts: Post[] } = await client.queryContractSmart(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!, { latest_posts: {} });
+      const posts = await queryPosts();
       setPosts(posts);
     }, 10000);
 
@@ -39,9 +41,7 @@ const Home: NextPage<{ initialPosts: Post[] }> = ({ initialPosts }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async(context) => {
-  const client = await CosmWasmClient.connect(process.env.NEXT_PUBLIC_RPC_ENDPOINT!);
-  const { posts }: { posts: Post[] } = await client.queryContractSmart(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!, { latest_posts: {} });
-  return { props: { initialPosts: posts } };
+  return { props: { initialPosts: await queryPosts() } };
 }
 
 export default Home
