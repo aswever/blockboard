@@ -6,12 +6,27 @@
 }
 
 .post {
-  border: 1px solid #333;
+  border: 1px solid #bbb;
+  border-radius: 0.2em;
   padding: 1em;
-  margin: 1em;
+  margin: 0.5em;
+  background-color: #fafafa;
 }
 
 .poster {
   border-bottom: 1px solid #333;
   margin-bottom: 0.5em;
+}
+
+.postAction {
+  align-self: center;
+  margin: 0.5em;
+  border: 1px solid #333;
+  border-radius: 0.2em;
+  padding: 0.2em;
+}
+
+.postAction:hover {
+  background-color: #111;
+  color: #eee;
 }

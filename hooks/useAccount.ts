@@ -57,7 +57,7 @@ export const useAccount = (signedTokenInit?: string) => {
     balance,
     login,
     addFunds,
-    loggedIn: !!signedToken,
     queryContract,
+    authToken: signedToken?.token,
   };
 };

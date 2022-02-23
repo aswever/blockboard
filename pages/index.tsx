@@ -36,6 +36,9 @@ const Home: NextPage<{ initialPosts: Post[] }> = ({ initialPosts }) => {
 
   return (
     <div className={styles.container}>
+      <div className={styles.postAction}>
+        <Link href="/post">add post</Link>
+      </div>
       {posts.map((post, idx) => (
         <div key={idx} className={styles.post}>
           <div className={styles.poster}>
@@ -44,7 +47,6 @@ const Home: NextPage<{ initialPosts: Post[] }> = ({ initialPosts }) => {
           <div className={styles.content}>{post.content}</div>
         </div>
       ))}
-      <Link href="/post">post message</Link>
     </div>
   );
 };

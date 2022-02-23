@@ -1,5 +1,31 @@
 .header {
   display: flex;
-  justify-content: space-around;
-  padding: 1em;
+  justify-content: space-between;
+  padding: 0.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #bbb;
+  background-color: #f6f6f6;
+  margin-bottom: 1em;
+}
+
+.home {
+  cursor: pointer;
+}
+
+.userIcon {
+  vertical-align: bottom;
+}
+
+.userInfo {
+  display: flex;
+}
+
+.user {
+  cursor: pointer;
+}
+
+.balance {
+  border-left: 1px solid black;
+  padding-left: 0.5em;
+  margin-left: 0.5em;
 }
