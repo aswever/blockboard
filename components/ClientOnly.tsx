@@ -5,11 +5,11 @@ const ClientOnly: FC = ({ children }) => {
 
   useEffect(() => {
     setReady(true);
-  });
+  }, []);
 
   if (!ready) return null;
 
-  return children;
-}
+  return <>{children}</>;
+};
 
 export default ClientOnly;

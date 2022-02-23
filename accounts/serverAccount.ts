@@ -1,16 +1,21 @@
+import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
+import { Secp256k1HdWallet, serializeSignDoc } from "@cosmjs/launchpad";
+import { makeADR36AminoSignDoc, verifyTokenSignature } from "./auth";
 import {
-  ExecuteResult,
-} from '@cosmjs/cosmwasm-stargate';
-import { Secp256k1HdWallet, serializeSignDoc } from '@cosmjs/launchpad';
-import { makeADR36AminoSignDoc, verifyTokenSignature } from './auth';
-import { AuthToken, ExecuteOptions, SignedToken } from './types';
-import { ContractAccount } from './contractAccount';
+  Authorization,
+  AuthToken,
+  ExecuteOptions,
+  MessageWithAuthorization,
+  SignedToken,
+} from "./types";
+import { ContractAccount } from "./contractAccount";
+import { config } from "../util/config";
 
 export class ServerAccount extends ContractAccount {
   static async create(): Promise<ServerAccount> {
     const wallet = await Secp256k1HdWallet.fromMnemonic(
-      process.env.WALLET_MNEMONIC!,
-      { prefix: process.env.NEXT_PUBLIC_ADDR_PREFIX! },
+      config("walletMnemonic"),
+      { prefix: config("addrPrefix") }
     );
     return super.fromSigner(wallet, this);
   }
@@ -18,9 +23,10 @@ export class ServerAccount extends ContractAccount {
   async validateToken(signedToken: SignedToken): Promise<AuthToken> {
     const authToken: AuthToken = signedToken.token;
 
-    const valid = await verifyTokenSignature(signedToken)
-      && authToken.user === signedToken.address
-      && authToken.agent === this.address;
+    const valid =
+      (await verifyTokenSignature(signedToken)) &&
+      authToken.user === signedToken.address &&
+      authToken.agent === this.address;
 
     if (!valid) {
       throw new Error("Invalid auth token");
@@ -31,8 +37,13 @@ export class ServerAccount extends ContractAccount {
 
   prepareAuthorization(signedToken: SignedToken) {
     const document = Buffer.from(
-      serializeSignDoc(makeADR36AminoSignDoc(signedToken.address, JSON.stringify(signedToken.token))),
-    ).toString('base64');
+      serializeSignDoc(
+        makeADR36AminoSignDoc(
+          signedToken.address,
+          JSON.stringify(signedToken.token)
+        )
+      )
+    ).toString("base64");
 
     return {
       document,
@@ -43,12 +54,13 @@ export class ServerAccount extends ContractAccount {
 
   async executeWithAuth(
     signedToken: SignedToken,
-    message: { [key: string]: any },
+    message: MessageWithAuthorization,
     options: ExecuteOptions = {}
   ): Promise<ExecuteResult> {
     await this.validateToken(signedToken);
     const authorization = this.prepareAuthorization(signedToken);
-    message.post.authorization = authorization;
+    const [rootKey] = Object.keys(message);
+    message[rootKey].authorization = authorization;
     return this.execute(message, options);
   }
 }

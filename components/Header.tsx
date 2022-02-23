@@ -9,10 +9,10 @@ const Header: FC = () => {
     <div className={styles.header}>
       <Link href="/">home</Link>
       <ClientOnly>
-	<Account />
+        <Account />
       </ClientOnly>
     </div>
   );
-}
+};
 
 export default Header;

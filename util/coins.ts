@@ -3,13 +3,15 @@ import { config } from "./config";
 
 export function toMicroAmount(amount: string) {
   return String(
-    Number.parseFloat(amount) * Math.pow(10, Number.parseInt(config("coinDecimals")))
+    Number.parseFloat(amount) *
+      Math.pow(10, Number.parseInt(config("coinDecimals")))
   );
 }
 
 export function fromMicroAmount(amount: string) {
   return String(
-    Number.parseInt(amount) / Math.pow(10, Number.parseInt(config("coinDecimals")))
+    Number.parseInt(amount) /
+      Math.pow(10, Number.parseInt(config("coinDecimals")))
   );
 }
 

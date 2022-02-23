@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSignedToken } from "../store";
 import { ClientAccount } from "../accounts/clientAccount";
-import { toMicroAmount, amountToCoin, fromMicroAmount } from "../util/coins";
+import { toMicroAmount, amountToCoin } from "../util/coins";
 import { config } from "../util/config";
 import { coin } from "@cosmjs/launchpad";
 import { queryContract } from "../util/queryContract";
@@ -18,15 +18,20 @@ export const useAccount = (signedTokenInit?: string) => {
     return clientAccount;
   }, [account]);
 
-  const login = useCallback(async (username: string) => {
-    const account = await getAccount();
-    const signedToken = await account.signAuthToken({ username })
-    setSignedToken(signedToken);
-  }, [getAccount, signedToken]);
+  const login = useCallback(
+    async (username: string) => {
+      const account = await getAccount();
+      const signedToken = await account.signAuthToken({ username });
+      setSignedToken(signedToken);
+    },
+    [getAccount, setSignedToken]
+  );
 
   const getBalance = useCallback(async () => {
     if (!signedToken) return setBalance(amountToCoin(0));
-    const { balance } = await queryContract({ get_balance: { addr: signedToken.address } });
+    const { balance } = await queryContract({
+      get_balance: { addr: signedToken.address },
+    });
     setBalance(amountToCoin(balance));
   }, [signedToken]);
 
@@ -34,13 +39,25 @@ export const useAccount = (signedTokenInit?: string) => {
     getBalance();
   }, [getBalance]);
 
-  const addFunds = useCallback(async (funds: string) => {
-    const amount = toMicroAmount(funds);
-    const account = await getAccount();
-    await account.execute({ deposit_funds: { amount } }, { cost: [amountToCoin(amount)] });
-    await getBalance();
-  }, [getAccount]);
+  const addFunds = useCallback(
+    async (funds: string) => {
+      const amount = toMicroAmount(funds);
+      const account = await getAccount();
+      await account.execute(
+        { deposit_funds: { amount } },
+        { cost: [amountToCoin(amount)] }
+      );
+      await getBalance();
+    },
+    [getAccount, getBalance]
+  );
 
-  return { getAccount, balance, login, addFunds, loggedIn: !!signedToken, queryContract };
-
-}
+  return {
+    getAccount,
+    balance,
+    login,
+    addFunds,
+    loggedIn: !!signedToken,
+    queryContract,
+  };
+};

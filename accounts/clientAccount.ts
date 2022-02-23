@@ -30,7 +30,11 @@ export class ClientAccount extends ContractAccount {
   }
 
   async signMessage(message: string): Promise<StdSignature> {
-    return (await ClientAccount.getKeplr()).signArbitrary(config("chainId"), this.address, message);
+    return (await ClientAccount.getKeplr()).signArbitrary(
+      config("chainId"),
+      this.address,
+      message
+    );
   }
 
   static async create(): Promise<ClientAccount> {
@@ -58,7 +62,10 @@ export class ClientAccount extends ContractAccount {
             (event.target as Document).readyState === "complete"
           ) {
             resolve(window.keplr);
-            document.removeEventListener("readystatechange", documentStateChange);
+            document.removeEventListener(
+              "readystatechange",
+              documentStateChange
+            );
           }
         };
 

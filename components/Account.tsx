@@ -8,9 +8,15 @@ const Account: FC = () => {
 
   return (
     <div>
-      <Link href="/account">{loggedIn ? <div>logged in (balance: {coinToString(balance)})</div> : "login"}</Link>
+      <Link href="/account">
+        {loggedIn ? (
+          <div>logged in (balance: {coinToString(balance)})</div>
+        ) : (
+          "login"
+        )}
+      </Link>
     </div>
   );
-}
+};
 
 export default Account;

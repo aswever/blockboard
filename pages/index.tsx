@@ -1,10 +1,7 @@
-import type { GetServerSideProps, NextPage } from 'next';
+import type { GetServerSideProps, NextPage } from "next";
 import { useEffect, useMemo, useState } from "react";
-import styles from '../styles/Home.module.css';
-import Link from 'next/link';
-import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { useAccount } from '../hooks/useAccount';
-import { config } from '../util/config';
+import styles from "../styles/Home.module.css";
+import Link from "next/link";
 import { queryContract } from "../util/queryContract";
 
 interface Post {
@@ -13,7 +10,16 @@ interface Post {
   content: string;
 }
 
-const queryPosts = async (): Promise<Post[]> => (await queryContract({ latest_posts: {} })).posts;
+interface LatestPostsResponse {
+  posts: Post[];
+}
+
+const queryPosts = async (): Promise<Post[]> => {
+  const { posts } = await queryContract<LatestPostsResponse>({
+    latest_posts: {},
+  });
+  return posts;
+};
 
 const Home: NextPage<{ initialPosts: Post[] }> = ({ initialPosts }) => {
   const postsInit = useMemo(() => initialPosts, [initialPosts]);
@@ -32,16 +38,19 @@ const Home: NextPage<{ initialPosts: Post[] }> = ({ initialPosts }) => {
     <div className={styles.container}>
       {posts.map((post, idx) => (
         <div key={idx} className={styles.post}>
-          <div className={styles.poster}>{post.username} ({post.user_addr})</div>
+          <div className={styles.poster}>
+            {post.username} ({post.user_addr})
+          </div>
           <div className={styles.content}>{post.content}</div>
-        </div>))}
+        </div>
+      ))}
       <Link href="/post">post message</Link>
-    </div> 
-  )
-}
+    </div>
+  );
+};
 
-export const getServerSideProps: GetServerSideProps = async(context) => {
+export const getServerSideProps: GetServerSideProps = async () => {
   return { props: { initialPosts: await queryPosts() } };
-}
+};
 
-export default Home
+export default Home;

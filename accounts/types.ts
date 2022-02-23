@@ -22,3 +22,16 @@ export interface SignedToken {
   signature: string;
   pubkey: string;
 }
+
+export interface Authorization {
+  document: string;
+  signature: string;
+  pubkey: string;
+}
+
+export interface MessageWithAuthorization {
+  [key: string]: {
+    [key: string]: unknown;
+    authorization?: Authorization;
+  };
+}

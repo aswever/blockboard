@@ -9,6 +9,8 @@ export const configMap = {
   gasPrice: process.env.NEXT_PUBLIC_GAS_PRICE,
   contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
   agentAddress: process.env.NEXT_PUBLIC_AGENT_ADDRESS,
+  // server config
+  walletMnemonic: process.env.WALLET_MNEMONIC,
 };
 
 export type ConfigKey = keyof typeof configMap;
@@ -17,4 +19,4 @@ export const config = (key: ConfigKey): string => {
   const value = configMap[key];
   if (!value) throw new Error(`Missing config for ${key}`);
   return value;
-}
+};
