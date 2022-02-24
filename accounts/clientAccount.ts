@@ -17,7 +17,7 @@ export class ClientAccount extends ContractAccount {
     const token = {
       user: this.address,
       agent: config("agentAddress"),
-      expires: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+      expires: Math.floor(Date.now() / 1000) + 60 * 60,
       meta,
     };
 

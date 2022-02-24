@@ -20,7 +20,7 @@ const Post: NextPage = () => {
         body: JSON.stringify({ signedToken, content }),
       });
       router.push("/");
-      setLoading(false);
+      setTimeout(() => setLoading(false), 1000);
     },
     [content, router, signedToken]
   );

@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useAccount } from "../../hooks/useAccount";
 import styles from "../../styles/Account.module.css";
@@ -8,6 +9,7 @@ import { formAction } from "../../util/form";
 import { getServerSideToken } from "../../util/getServerSideToken";
 
 export const FundAccount: NextPage<{ initToken: string }> = ({ initToken }) => {
+  const router = useRouter();
   const [message, setMessage] = useState("");
   const [funds, setFunds] = useState("");
   const { moveFunds } = useAccount(initToken);
@@ -20,6 +22,7 @@ export const FundAccount: NextPage<{ initToken: string }> = ({ initToken }) => {
       await moveFunds(funds, action);
       setMessage("success!");
       setFunds("");
+      router.push("/");
     } catch (e) {
       setMessage(`error: ${e}`);
     }

@@ -9,6 +9,7 @@ export const configMap = {
   gasPrice: process.env.NEXT_PUBLIC_GAS_PRICE,
   contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
   agentAddress: process.env.NEXT_PUBLIC_AGENT_ADDRESS,
+  postFee: process.env.NEXT_PUBLIC_POST_FEE,
   // server config
   walletMnemonic: process.env.WALLET_MNEMONIC,
 };

@@ -20,10 +20,8 @@ export default async function handler(
 ) {
   const { signedToken, content } = JSON.parse(req.body) as RequestBody;
   const account = await ServerAccount.create();
-  const response = await account.executeWithAuth(
-    signedToken,
-    { post: { message: { content } } },
-    { cost: [amountToCoin(10000)] }
-  );
+  const response = await account.executeWithAuth(signedToken, {
+    post: { message: { content } },
+  });
   res.status(200).json({ response });
 }

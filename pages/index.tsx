@@ -2,25 +2,9 @@ import type { GetServerSideProps, NextPage } from "next";
 import { useEffect, useState } from "react";
 import styles from "../styles/Home.module.css";
 import Link from "next/link";
-import { queryContract } from "../util/queryContract";
 import { useAccount } from "../hooks/useAccount";
-
-interface Post {
-  user_addr: string;
-  username: string;
-  content: string;
-}
-
-interface LatestPostsResponse {
-  posts: Post[];
-}
-
-const queryPosts = async (): Promise<Post[]> => {
-  const { posts } = await queryContract<LatestPostsResponse>({
-    latest_posts: {},
-  });
-  return posts;
-};
+import { Post, queryPosts } from "../util/posts";
+import { config } from "../util/config";
 
 interface HomeProps {
   initialPosts: Post[];
@@ -47,7 +31,7 @@ const Home: NextPage<HomeProps> = ({ initialPosts, initToken }) => {
           <Link href="/account/login" passHref={true}>
             <button>login to post</button>
           </Link>
-        ) : !Number(balance.amount) ? (
+        ) : Number(balance.amount) < Number(config("postFee")) ? (
           <Link href="/account/fund" passHref={true}>
             <button>add funds to post</button>
           </Link>

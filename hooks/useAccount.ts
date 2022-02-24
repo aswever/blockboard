@@ -28,10 +28,22 @@ export const useAccount = (signedTokenInit?: string) => {
     [getAccount, setSignedToken]
   );
 
-  const logout = useCallback(async () => {
-    setSignedToken(null);
-    router.push("/account/login");
-  }, [setSignedToken, router]);
+  const logout = useCallback(
+    async (redirect = true) => {
+      setSignedToken(null);
+      if (redirect) router.push("/account/login");
+    },
+    [setSignedToken, router]
+  );
+
+  useEffect(() => {
+    if (!signedToken) return;
+    const timeout = setTimeout(
+      () => logout(false),
+      signedToken.token.expires - Date.now()
+    );
+    return () => clearTimeout(timeout);
+  }, [signedToken, logout]);
 
   const getBalance = useCallback(async () => {
     if (!signedToken) return setBalance(amountToCoin(0));
