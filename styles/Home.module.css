@@ -1,32 +1,53 @@
-.container {
+.postAction {
   display: flex;
-  flex-direction: column;
-  width: 50%;
-  margin: auto;
+  justify-content: center;
+  margin: 0.5em;
+  margin-bottom: 1.5em;
+}
+
+.postAction button {
+  width: 20em;
+  text-align: center;
+  border: 1px solid #333;
+  border-radius: 0.2em;
+  padding: 0.2em;
+  cursor: pointer;
+}
+
+.postAction button:hover {
+  background-color: #ddd;
 }
 
 .post {
   border: 1px solid #bbb;
   border-radius: 0.2em;
-  padding: 1em;
-  margin: 0.5em;
+  padding: 0.5em;
+  margin: 0.5em auto;
   background-color: #fafafa;
+}
+
+.poster,
+.content {
+  padding: 0.5em;
 }
 
 .poster {
   border-bottom: 1px solid #333;
   margin-bottom: 0.5em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.postAction {
-  align-self: center;
-  margin: 0.5em;
-  border: 1px solid #333;
-  border-radius: 0.2em;
-  padding: 0.2em;
+.username {
+  font-weight: bold;
+  flex-grow: 1;
+  padding-right: 0.5em;
 }
 
-.postAction:hover {
-  background-color: #111;
-  color: #eee;
+.userAddr {
+  font-size: 0.8em;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

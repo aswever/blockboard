@@ -2,7 +2,6 @@ import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Secp256k1HdWallet, serializeSignDoc } from "@cosmjs/launchpad";
 import { makeADR36AminoSignDoc, verifyTokenSignature } from "./auth";
 import {
-  Authorization,
   AuthToken,
   ExecuteOptions,
   MessageWithAuthorization,

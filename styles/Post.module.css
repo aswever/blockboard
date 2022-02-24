@@ -1,0 +1,27 @@
+.form {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  flex-direction: column;
+  margin-top: 0.3em;
+}
+
+.form textarea,
+.form button {
+  width: 20em;
+  margin: 0.2em;
+  text-align: center;
+}
+
+.form textarea {
+  height: 8em;
+  overflow-x: hidden;
+}
+
+.form button {
+  cursor: pointer;
+}
+
+.posting {
+  text-align: center;
+}

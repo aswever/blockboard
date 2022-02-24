@@ -1,8 +1,9 @@
 import type { GetServerSideProps, NextPage } from "next";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../styles/Home.module.css";
 import Link from "next/link";
 import { queryContract } from "../util/queryContract";
+import { useAccount } from "../hooks/useAccount";
 
 interface Post {
   user_addr: string;
@@ -21,9 +22,14 @@ const queryPosts = async (): Promise<Post[]> => {
   return posts;
 };
 
-const Home: NextPage<{ initialPosts: Post[] }> = ({ initialPosts }) => {
-  const postsInit = useMemo(() => initialPosts, [initialPosts]);
-  const [posts, setPosts] = useState(postsInit);
+interface HomeProps {
+  initialPosts: Post[];
+  initToken?: string;
+}
+
+const Home: NextPage<HomeProps> = ({ initialPosts, initToken }) => {
+  const { authToken, balance } = useAccount(initToken);
+  const [posts, setPosts] = useState(initialPosts);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -35,14 +41,27 @@ const Home: NextPage<{ initialPosts: Post[] }> = ({ initialPosts }) => {
   }, []);
 
   return (
-    <div className={styles.container}>
+    <div>
       <div className={styles.postAction}>
-        <Link href="/post">add post</Link>
+        {!authToken ? (
+          <Link href="/account/login" passHref={true}>
+            <button>login to post</button>
+          </Link>
+        ) : !Number(balance.amount) ? (
+          <Link href="/account/fund" passHref={true}>
+            <button>add funds to post</button>
+          </Link>
+        ) : (
+          <Link href="/post" passHref={true}>
+            <button>add post</button>
+          </Link>
+        )}
       </div>
       {posts.map((post, idx) => (
         <div key={idx} className={styles.post}>
           <div className={styles.poster}>
-            {post.username} ({post.user_addr})
+            <div className={styles.username}>{post.username}</div>{" "}
+            <div className={styles.userAddr}>{post.user_addr}</div>
           </div>
           <div className={styles.content}>{post.content}</div>
         </div>
@@ -51,8 +70,11 @@ const Home: NextPage<{ initialPosts: Post[] }> = ({ initialPosts }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  return { props: { initialPosts: await queryPosts() } };
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const props: HomeProps = { initialPosts: await queryPosts() };
+  const initToken = context.req.cookies.signedToken;
+  if (initToken) props.initToken = initToken;
+  return { props };
 };
 
 export default Home;

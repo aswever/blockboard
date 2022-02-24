@@ -1,22 +1,23 @@
-import { useCallback, useEffect, useState } from "react";
-import { useSignedToken } from "../store";
+import { useCallback, useEffect } from "react";
+import { accountAtom, balanceAtom, useSignedToken } from "../store";
 import { ClientAccount } from "../accounts/clientAccount";
 import { toMicroAmount, amountToCoin } from "../util/coins";
-import { config } from "../util/config";
-import { coin } from "@cosmjs/launchpad";
 import { queryContract } from "../util/queryContract";
+import { useAtom } from "jotai";
+import { useRouter } from "next/router";
 
 export const useAccount = (signedTokenInit?: string) => {
+  const router = useRouter();
   const [signedToken, setSignedToken] = useSignedToken(signedTokenInit);
-  const [balance, setBalance] = useState(coin(0, config("coinDenom")));
-  const [account, setAccount] = useState<ClientAccount>();
+  const [balance, setBalance] = useAtom(balanceAtom);
+  const [account, setAccount] = useAtom(accountAtom);
 
   const getAccount = useCallback(async (): Promise<ClientAccount> => {
     if (account) return account;
     const clientAccount = await ClientAccount.create();
     setAccount(clientAccount);
     return clientAccount;
-  }, [account]);
+  }, [account, setAccount]);
 
   const login = useCallback(
     async (username: string) => {
@@ -27,25 +28,30 @@ export const useAccount = (signedTokenInit?: string) => {
     [getAccount, setSignedToken]
   );
 
+  const logout = useCallback(async () => {
+    setSignedToken(null);
+    router.push("/account/login");
+  }, [setSignedToken, router]);
+
   const getBalance = useCallback(async () => {
     if (!signedToken) return setBalance(amountToCoin(0));
     const { balance } = await queryContract({
       get_balance: { addr: signedToken.address },
     });
     setBalance(amountToCoin(balance));
-  }, [signedToken]);
+  }, [signedToken, setBalance]);
 
   useEffect(() => {
     getBalance();
   }, [getBalance]);
 
-  const addFunds = useCallback(
-    async (funds: string) => {
+  const moveFunds = useCallback(
+    async (funds: string, action: "deposit" | "withdraw") => {
       const amount = toMicroAmount(funds);
       const account = await getAccount();
       await account.execute(
-        { deposit_funds: { amount } },
-        { cost: [amountToCoin(amount)] }
+        { [`${action}_funds`]: { amount } },
+        { cost: action === "deposit" ? [amountToCoin(amount)] : undefined }
       );
       await getBalance();
     },
@@ -56,7 +62,8 @@ export const useAccount = (signedTokenInit?: string) => {
     getAccount,
     balance,
     login,
-    addFunds,
+    logout,
+    moveFunds,
     queryContract,
     authToken: signedToken?.token,
   };

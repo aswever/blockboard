@@ -1,5 +1,5 @@
 import { FC } from "react";
-import Account from "./Account";
+import UserInfo from "./UserInfo";
 import styles from "../styles/Header.module.css";
 import ClientOnly from "./ClientOnly";
 import Link from "next/link";
@@ -14,7 +14,7 @@ const Header: FC = () => {
         </a>
       </Link>
       <ClientOnly>
-        <Account />
+        <UserInfo />
       </ClientOnly>
     </div>
   );
