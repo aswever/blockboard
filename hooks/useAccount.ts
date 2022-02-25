@@ -1,10 +1,12 @@
 import { useCallback, useEffect } from "react";
 import { accountAtom, balanceAtom, useSignedToken } from "../store";
-import { ClientAccount } from "../accounts/clientAccount";
 import { toMicroAmount, amountToCoin } from "../util/coins";
 import { queryContract } from "../util/queryContract";
 import { useAtom } from "jotai";
 import { useRouter } from "next/router";
+import { UserAccount } from "cw-auth-js";
+import { getKeplr, suggestChain } from "../accounts/keplr";
+import { configObject } from "../util/config";
 
 export const useAccount = (signedTokenInit?: string) => {
   const router = useRouter();
@@ -12,12 +14,28 @@ export const useAccount = (signedTokenInit?: string) => {
   const [balance, setBalance] = useAtom(balanceAtom);
   const [account, setAccount] = useAtom(accountAtom);
 
-  const getAccount = useCallback(async (): Promise<ClientAccount> => {
+  const createAccount = useCallback(async (): Promise<UserAccount> => {
+    const keplr = await getKeplr();
+    await suggestChain(keplr);
+    const userAccount = await UserAccount.create(
+      keplr,
+      configObject(
+        "rpcEndpoint",
+        "gasPrice",
+        "coinDenom",
+        "chainId",
+        "contractAddress",
+        "agentAddress"
+      )
+    );
+    setAccount(userAccount);
+    return userAccount;
+  }, [setAccount]);
+
+  const getAccount = useCallback(async (): Promise<UserAccount> => {
     if (account) return account;
-    const clientAccount = await ClientAccount.create();
-    setAccount(clientAccount);
-    return clientAccount;
-  }, [account, setAccount]);
+    return createAccount();
+  }, [account, createAccount]);
 
   const login = useCallback(
     async (username: string) => {
@@ -38,11 +56,15 @@ export const useAccount = (signedTokenInit?: string) => {
 
   useEffect(() => {
     if (!signedToken) return;
-    const timeout = setTimeout(
-      () => logout(false),
-      signedToken.token.expires - Date.now()
-    );
-    return () => clearTimeout(timeout);
+    if (signedToken.token.expires * 1000 < Date.now()) {
+      logout(false);
+    } else {
+      const timeout = setTimeout(
+        () => logout(false),
+        signedToken.token.expires * 1000 - Date.now()
+      );
+      return () => clearTimeout(timeout);
+    }
   }, [signedToken, logout]);
 
   const getBalance = useCallback(async () => {
@@ -63,7 +85,7 @@ export const useAccount = (signedTokenInit?: string) => {
       const account = await getAccount();
       await account.execute(
         { [`${action}_funds`]: { amount } },
-        { cost: action === "deposit" ? [amountToCoin(amount)] : undefined }
+        { funds: action === "deposit" ? [amountToCoin(amount)] : undefined }
       );
       await getBalance();
     },

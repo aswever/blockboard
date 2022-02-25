@@ -29,3 +29,18 @@
   padding-left: 0.5em;
   margin-left: 0.5em;
 }
+
+.message {
+  margin: 0.5em auto;
+  background-color: #f8f8f8;
+  border: 1px solid #bbb;
+  padding: 0.5em;
+  text-align: center;
+  font-size: 0.9em;
+  border-radius: 0.2em;
+  width: 70%;
+}
+
+.message.error {
+  background-color: #ffcccc;
+}

@@ -1,36 +1,46 @@
 import type { NextPage } from "next";
 import { FormEvent, useCallback, useState } from "react";
-import { useSignedToken } from "../store";
+import { messageAtom, useSignedToken } from "../store";
 import styles from "../styles/Post.module.css";
 import { useRouter } from "next/router";
 import { getServerSideToken } from "../util/getServerSideToken";
+import { useAtom } from "jotai";
 
 const Post: NextPage = () => {
   const router = useRouter();
   const [signedToken] = useSignedToken();
-  const [content, setContent] = useState("");
+  const [, setMessage] = useAtom(messageAtom);
   const [loading, setLoading] = useState(false);
+  const [content, setContent] = useState("");
 
   const onSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
       setLoading(true);
-      await fetch("/api/post", {
+      setMessage({ text: "posting...", timeout: 10000 });
+      const { ok, statusText } = await fetch("/api/post", {
         method: "post",
         body: JSON.stringify({ signedToken, content }),
       });
-      router.push("/");
-      setTimeout(() => setLoading(false), 1000);
+      if (ok) {
+        setMessage({ text: "posted!" });
+        setTimeout(() => router.push("/"), 500);
+      } else {
+        setMessage({
+          text: `error: ${statusText}`,
+          error: true,
+          timeout: 5000,
+        });
+      }
+      setLoading(false);
     },
-    [content, router, signedToken]
+    [content, router, signedToken, setMessage]
   );
-
-  if (loading) return <div className={styles.posting}>posting...</div>;
 
   return (
     <div>
       <form onSubmit={onSubmit} className={styles.form}>
-        <button>post</button>
+        <button disabled={loading}>post</button>
         <textarea
           placeholder="your message"
           maxLength={140}

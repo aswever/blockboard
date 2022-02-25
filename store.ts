@@ -1,9 +1,8 @@
 import { atom, useAtom, WritableAtom } from "jotai";
-import { SignedToken } from "./accounts/types";
 import Cookies from "js-cookie";
-import { ClientAccount } from "./accounts/clientAccount";
 import { coin } from "@cosmjs/launchpad";
 import { config } from "./util/config";
+import { SignedToken, UserAccount } from "cw-auth-js";
 
 const atomFromCookie = <T>(
   key: string,
@@ -34,4 +33,12 @@ export const useSignedToken = (init?: string) => {
 };
 
 export const balanceAtom = atom(coin(0, config("coinDenom")));
-export const accountAtom = atom<ClientAccount | null>(null);
+export const accountAtom = atom<UserAccount | null>(null);
+
+interface Message {
+  text: string;
+  error?: boolean;
+  timeout?: number;
+}
+
+export const messageAtom = atom<Message | null>(null);

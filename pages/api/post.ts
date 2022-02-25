@@ -1,9 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
+import { AgentAccount, SignedToken } from "cw-auth-js";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { SignedToken } from "../../accounts/types";
-import { ServerAccount } from "../../accounts/serverAccount";
-import { amountToCoin } from "../../util/coins";
+import { config, configObject } from "../../util/config";
 
 type RequestBody = {
   signedToken: SignedToken;
@@ -19,7 +18,17 @@ export default async function handler(
   res: NextApiResponse<ResponseBody>
 ) {
   const { signedToken, content } = JSON.parse(req.body) as RequestBody;
-  const account = await ServerAccount.create();
+  const account = await AgentAccount.create(
+    config("walletMnemonic"),
+    configObject(
+      "rpcEndpoint",
+      "gasPrice",
+      "coinDenom",
+      "contractAddress",
+      "addrPrefix"
+    )
+  );
+  console.log(account);
   const response = await account.executeWithAuth(signedToken, {
     post: { message: { content } },
   });

@@ -21,3 +21,12 @@ export const config = (key: ConfigKey): string => {
   if (!value) throw new Error(`Missing config for ${key}`);
   return value;
 };
+
+export const configObject = (
+  ...keys: ConfigKey[]
+): { [key in ConfigKey]: string } => {
+  return keys.reduce((obj, key) => {
+    obj[key] = config(key);
+    return obj;
+  }, {} as { [key in ConfigKey]: string });
+};

@@ -1,7 +1,9 @@
+import { useAtom } from "jotai";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useAccount } from "../../hooks/useAccount";
+import { messageAtom } from "../../store";
 import styles from "../../styles/Account.module.css";
 import { fromMicroDenom } from "../../util/coins";
 import { config } from "../../util/config";
@@ -10,27 +12,26 @@ import { getServerSideToken } from "../../util/getServerSideToken";
 
 export const FundAccount: NextPage<{ initToken: string }> = ({ initToken }) => {
   const router = useRouter();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useAtom(messageAtom);
   const [funds, setFunds] = useState("");
   const { moveFunds } = useAccount(initToken);
 
   const denom = fromMicroDenom(config("coinDenom"));
 
   const fund = async (action: "deposit" | "withdraw") => {
-    setMessage(`${action}ing funds...`);
+    setMessage({ text: `${action}ing funds...`, timeout: 10000 });
     try {
       await moveFunds(funds, action);
-      setMessage("success!");
+      setMessage({ text: "success!" });
       setFunds("");
       router.push("/");
     } catch (e) {
-      setMessage(`error: ${e}`);
+      setMessage({ text: `error: ${e}`, error: true, timeout: 5000 });
     }
   };
 
   return (
     <form className={styles.form}>
-      {message && <div className={styles.message}>{message}</div>}
       <input
         name="funds"
         placeholder={denom}

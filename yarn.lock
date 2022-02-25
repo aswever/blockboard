@@ -950,6 +950,13 @@ curve25519-js@0.0.4:
   resolved "https://registry.yarnpkg.com/curve25519-js/-/curve25519-js-0.0.4.tgz#e6ad967e8cd284590d657bbfc90d8b50e49ba060"
   integrity sha512-axn2UMEnkhyDUPWOwVKBMVIzSQy2ejH2xRGy1wq81dqRwApXfIzfbE3hIX0ZRFBIihf/KDqK158DLwESu4AK1w==
 
+cw-auth-js@../cw-auth-js:
+  version "0.1.0"
+  dependencies:
+    "@cosmjs/cosmwasm-stargate" "^0.27.1"
+    "@cosmjs/crypto" "^0.27.1"
+    "@cosmjs/launchpad" "^0.27.1"
+
 damerau-levenshtein@^1.0.7:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/damerau-levenshtein/-/damerau-levenshtein-1.0.8.tgz#b43d286ccbd36bc5b2f7ed41caf2d0aba1f8a6e7"
