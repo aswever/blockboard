@@ -6,7 +6,8 @@ import { useAtom } from "jotai";
 import { useRouter } from "next/router";
 import { UserAccount } from "cw-auth-js";
 import { getKeplr, suggestChain } from "../accounts/keplr";
-import { configObject } from "../util/config";
+import { config, configObject } from "../util/config";
+import { coin } from "@cosmjs/launchpad";
 
 export const useAccount = (signedTokenInit?: string) => {
   const router = useRouter();
@@ -67,6 +68,11 @@ export const useAccount = (signedTokenInit?: string) => {
     }
   }, [signedToken, logout]);
 
+  const walletBalance = useCallback(async () => {
+    if (!signedToken || !account) return coin(0, config("coinDenom"));
+    return account.client.getBalance(account.address, config("coinDenom"));
+  }, [signedToken, account]);
+
   const getBalance = useCallback(async () => {
     if (!signedToken) return setBalance(amountToCoin(0));
     const { balance } = await queryContract({
@@ -100,5 +106,6 @@ export const useAccount = (signedTokenInit?: string) => {
     moveFunds,
     queryContract,
     authToken: signedToken?.token,
+    walletBalance,
   };
 };

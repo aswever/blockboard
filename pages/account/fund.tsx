@@ -12,14 +12,14 @@ import { getServerSideToken } from "../../util/getServerSideToken";
 
 export const FundAccount: NextPage<{ initToken: string }> = ({ initToken }) => {
   const router = useRouter();
-  const [message, setMessage] = useAtom(messageAtom);
+  const [, setMessage] = useAtom(messageAtom);
   const [funds, setFunds] = useState("");
   const { moveFunds } = useAccount(initToken);
 
   const denom = fromMicroDenom(config("coinDenom"));
 
   const fund = async (action: "deposit" | "withdraw") => {
-    setMessage({ text: `${action}ing funds...`, timeout: 10000 });
+    setMessage({ text: `${action}ing funds...`, timeout: 30000 });
     try {
       await moveFunds(funds, action);
       setMessage({ text: "success!" });

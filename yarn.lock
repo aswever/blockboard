@@ -950,8 +950,10 @@ curve25519-js@0.0.4:
   resolved "https://registry.yarnpkg.com/curve25519-js/-/curve25519-js-0.0.4.tgz#e6ad967e8cd284590d657bbfc90d8b50e49ba060"
   integrity sha512-axn2UMEnkhyDUPWOwVKBMVIzSQy2ejH2xRGy1wq81dqRwApXfIzfbE3hIX0ZRFBIihf/KDqK158DLwESu4AK1w==
 
-cw-auth-js@../cw-auth-js:
-  version "0.1.0"
+cw-auth-js@0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/cw-auth-js/-/cw-auth-js-0.1.2.tgz#71d019c8994cf9a6835fe86dc45cb7890fbc45d8"
+  integrity sha512-+W4YW+ZGAElzd3R2lxm14uaBtbFCkPn1BsBS1MMSuz05Ma6QFobQtLRO8wyVVXZJpVYIytS9SjB5nrQBiPYkhw==
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.27.1"
     "@cosmjs/crypto" "^0.27.1"
